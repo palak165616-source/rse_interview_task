@@ -1,4 +1,23 @@
 #!/usr/bin/env python3
+"""
+Fruit lookup utility using the Fruityvice API.
+
+This module provides:
+  - A tool to fetch information about fruits
+  - Functions for human-readable and machine-readable output
+
+Usage:
+    py fruit.py <fruitname> [--machine]
+
+Dependencies:
+    requests
+
+Functions:
+    fetch_fruit(name): Query the Fruityvice API for the given fruit.
+    human_readable(fruit): Format the fruit data for humans.
+    machine_readable(fruit): Format the fruit data as JSON.
+"""
+
 import requests
 import sys
 import argparse
@@ -7,20 +26,41 @@ import json
 # provided in spec
 API_ADDRESS = "https://www.fruityvice.com/api/fruit"
 
-"""
-custom exception/error handler for API request failure
-"""
+
 class API_Request_Error(Exception):
+    """
+    Exception raised when a request to the Fruityvice API fails.
+
+    This can occur due to network issues, server errors,
+    missing fruit names, or invalid JSON responses.
+    """
     pass
 
 # making the GET request a separate function helps make it work as a library function
 def fetch_fruit(name):
 
+    """
+    Fetch fruit details from the Fruityvice API.
+
+    Parameters-
+    name : str
+        The name of the fruit to query.
+
+    Returns-
+    dict
+        Parsed JSON of fruit data.
+
+    Raises-
+    API_Request_Error
+        If the network request fails, the fruit is not found, or the
+        response cannot be parsed as JSON.
+    """
+
     # Make a simple GET request to get the fruit
     try:
         response = requests.get(f"{API_ADDRESS}/{name.lower()}", timeout=5)
     # error with making the request
-    except requests.RequestException:
+    except requests.RequestException as exc:
         raise API_Request_Error(f"API request failed: {exc}")
 
     # fruit not found error
@@ -37,10 +77,24 @@ def fetch_fruit(name):
     except ValueError:
         raise API_Request_Error("Failed to parse JSON response.")
     
-"""
-function for printing the JSON response in a human-readable format
-"""
+
 def human_readable(fruit: dict) -> str:
+    """
+    Format fruit data into a human-readable string.
+
+    Parameters-
+    fruit : dict
+        The JSON object returned from the Fruityvice API for a given fruit.
+
+    Returns-
+    str
+        A multi-line string containing:
+          - Fruit name
+          - ID
+          - Family
+          - Sugar content
+          - Carbohydrate content
+    """
     nutr = fruit.get("nutritions", {})
 
     # return required information
@@ -52,10 +106,24 @@ def human_readable(fruit: dict) -> str:
         f"Carbohydrates (g): {nutr.get('carbohydrates')}"
     )
 
-"""
-function for printing the JSON response in a machine-readable format
-"""
+
 def machine_readable(fruit: dict) -> str:
+    """
+    Format fruit data into machine-readable JSON.
+
+    Parameters-
+    fruit : dict
+        The JSON object returned from the Fruityvice API for a given fruit.
+
+    Returns-
+    str
+        A JSON string with selected fields:
+          - name
+          - id
+          - family
+          - nutritions.sugar_g
+          - nutritions.carbohydrates_g
+    """
 
     # return required information
     output = {
