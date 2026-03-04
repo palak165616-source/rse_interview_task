@@ -29,21 +29,38 @@ def fetch_fruit(name):
     if not response.ok: 
         raise API_Request_Error(f"Error from server: {response.status_code}")
     
-    else:
-        print("Found")
+    try:
+        return response.json()
+    except ValueError:
+        raise API_Request_Error("Failed to parse JSON response.")
+    
+"""
+function for printing the JSON response in a human-readable format
+"""
+def human_readable(fruit: dict) -> str:
+    nutr = fruit.get("nutritions", {})
+    return (
+        f"Fruit: {fruit.get('name')}\n"
+        f"ID: {fruit.get('id')}\n"
+        f"Family: {fruit.get('family')}\n"
+        f"Sugar (g): {nutr.get('sugar')}\n"
+        f"Carbohydrates (g): {nutr.get('carbohydrates')}"
+    )
 
 def main():
 
     # Ensure correct arguments are being entered
     if len(sys.argv) < 2:
-        print("Error: No fruit given")
+        print("Usage: py fruit.py <fruit>")
         return
 
     name = sys.argv[1]
     try:
-        fetch_fruit(name)
+        fruit_data = fetch_fruit(name)
     except API_Request_Error:
         print("Error")
+    else:
+        print(human_readable(fruit_data))
 
 if __name__ == "__main__":
     sys.exit(main())
