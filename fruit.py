@@ -5,7 +5,13 @@ import sys
 # provided in spec
 API_ADDRESS = "https://www.fruityvice.com/api/fruit"
 
+"""
+custom exception/error handler for API request failure
+"""
+class API_Request_Error(Exception):
+    pass
 
+# making the GET request a separate function helps make it work as a library function
 def fetch_fruit(name):
 
     # Make a simple GET request to get the fruit
@@ -13,13 +19,18 @@ def fetch_fruit(name):
         response = requests.get(f"{API_ADDRESS}/{name.lower()}", timeout=5)
     # error with making the request
     except requests.RequestException:
-        print("Error")
+        raise API_Request_Error(f"API request failed: {exc}")
+
+    # fruit not found error
+    if response.status_code == 404:
+        raise API_Request_Error(f"Fruit '{name}' not found in database.")
+    
+    # server error
+    if not response.ok: 
+        raise API_Request_Error(f"Error from server: {response.status_code}")
+    
     else:
-        # fruit not found error or server error
-        if response.status_code == 404 or not response.ok:
-            print("Error")
-        else:
-            print("Found")
+        print("Found")
 
 def main():
 
