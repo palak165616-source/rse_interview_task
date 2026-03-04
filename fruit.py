@@ -29,6 +29,7 @@ def fetch_fruit(name):
     if not response.ok: 
         raise API_Request_Error(f"Error from server: {response.status_code}")
     
+    # try except block for errors regarding the JSON response
     try:
         return response.json()
     except ValueError:
@@ -39,6 +40,8 @@ function for printing the JSON response in a human-readable format
 """
 def human_readable(fruit: dict) -> str:
     nutr = fruit.get("nutritions", {})
+
+    # return required information
     return (
         f"Fruit: {fruit.get('name')}\n"
         f"ID: {fruit.get('id')}\n"
@@ -57,8 +60,8 @@ def main():
     name = sys.argv[1]
     try:
         fruit_data = fetch_fruit(name)
-    except API_Request_Error:
-        print("Error")
+    except API_Request_Error as e:
+        print(f"Error: {e}")
     else:
         print(human_readable(fruit_data))
 
