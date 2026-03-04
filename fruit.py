@@ -36,11 +36,14 @@ def main():
 
     # Ensure correct arguments are being entered
     if len(sys.argv) < 2:
-        print("Error")
+        print("Error: No fruit given")
+        return
 
-    else:
-        name = sys.argv[1]
+    name = sys.argv[1]
+    try:
         fetch_fruit(name)
+    except API_Request_Error:
+        print("Error")
 
 if __name__ == "__main__":
     sys.exit(main())
