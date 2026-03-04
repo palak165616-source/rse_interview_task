@@ -5,12 +5,10 @@ import sys
 # provided in spec
 API_ADDRESS = "https://www.fruityvice.com/api/fruit"
 
-# Make a simple GET request to get the fruit
-# Ensure correct arguments are being entered
-if len(sys.argv) < 2:
-    print("Error")
-else:
-    name = sys.argv[1]
+
+def fetch_fruit(name):
+
+    # Make a simple GET request to get the fruit
     try:
         response = requests.get(f"{API_ADDRESS}/{name.lower()}", timeout=5)
     # error with making the request
@@ -22,3 +20,16 @@ else:
             print("Error")
         else:
             print("Found")
+
+def main():
+
+    # Ensure correct arguments are being entered
+    if len(sys.argv) < 2:
+        print("Error")
+
+    else:
+        name = sys.argv[1]
+        fetch_fruit(name)
+
+if __name__ == "__main__":
+    sys.exit(main())
