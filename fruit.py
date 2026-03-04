@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import requests
 import sys
+import argparse
+import json
 
 # provided in spec
 API_ADDRESS = "https://www.fruityvice.com/api/fruit"
@@ -50,20 +52,54 @@ def human_readable(fruit: dict) -> str:
         f"Carbohydrates (g): {nutr.get('carbohydrates')}"
     )
 
+"""
+function for printing the JSON response in a machine-readable format
+"""
+def machine_readable(fruit: dict) -> str:
+
+    # return required information
+    output = {
+        "name": fruit.get("name"),
+        "id": fruit.get("id"),
+        "family": fruit.get("family"),
+        "nutritions": {
+            "sugar_g": fruit.get("nutritions", {}).get("sugar"),
+            "carbohydrates_g": fruit.get("nutritions", {}).get("carbohydrates")
+        }
+    }
+    return json.dumps(output, indent=2)
+
 def main():
 
     # Ensure correct arguments are being entered
-    if len(sys.argv) < 2:
-        print("Usage: py fruit.py <fruit>")
-        return
+    # tags to print information in a machine readle format
+    parser = argparse.ArgumentParser(description="Lookup fruit details from Fruityvice API.")
+    parser.add_argument("fruit", help="fruit to lookup")
+    parser.add_argument(
+        "-m", "--machine",
+        action="store_true",
+        help="Output fruit details in machine-readable JSON"
+    )
 
-    name = sys.argv[1]
+    args = parser.parse_args()
+
     try:
-        fruit_data = fetch_fruit(name)
+        fruit_data = fetch_fruit(args.fruit)
+
+    # print respective error message
     except API_Request_Error as e:
         print(f"Error: {e}")
+        return 1
+
+    # print in a machine readable JSON format
+    if args.machine:
+        print(machine_readable(fruit_data))
+
+    # print in a human readable format
     else:
         print(human_readable(fruit_data))
+
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main())
